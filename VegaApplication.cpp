@@ -1,21 +1,38 @@
 #include "VegaApplication.h"
 #include <iostream>
+#include <Logger.h>
+#include <stdexcept>
 
 namespace vega {
     VegaApplication::VegaApplication() {
-        std::cout << "VegaApplication constructed." << std::endl;
+        LOG_INFO("VegaApplication constructed");
     }
 
     VegaApplication::~VegaApplication() {
-        std::cout << "VegaApplication destructed." << std::endl;
+        LOG_INFO("VegaApplication destructed");
     }
 
 
     void VegaApplication::OnCreated() {
+
         // Print Vega-specific window creation logic first
-        std::cout << "VegaApplication OnCreated: Window is now available to the application!" << std::endl;
+        LOG_INFO("VegaApplication OnCreated: Window is now available to the application!");
 
         // Then call base class OnCreated
         polaris::Application::OnCreated();
+
+        // Additional Vega-specific initialization can go here
+        // e.g., initialize game systems, load resources, etc.
+    }
+
+    void VegaApplication::onDestroy() {
+        // Print Vega-specific cleanup logic first
+        LOG_INFO("VegaApplication onDestroy: Cleaning up Vega-specific resources.");
+        
+        // Then call base class onDestroy
+        polaris::Application::onDestroy();
+        
+        // Additional Vega-specific cleanup can go here
+        // e.g., save game state, cleanup game systems, etc.
     }
 } // namespace vega
