@@ -1,9 +1,20 @@
 #include <iostream>
+#include "../polaris/library.h"
 
-#include <library.h>
+int main(int argc, char **argv) {
 
-int main() {
     std::cout << "Vega Win32 Application" << std::endl;
-    hello(); // Call the engine library function
+
+    // Call the hello function which creates the SDL3 window with Vulkan
+    //polaris::Renderer *renderer = new polaris::Renderer();
+
+    /*while (true) {
+        renderer->render();
+    }*/
+    hello();
     return 0;
 }
+
+
+
+
