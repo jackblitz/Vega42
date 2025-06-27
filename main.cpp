@@ -1,17 +1,16 @@
 #include <iostream>
-#include "../polaris/library.h"
+#include <memory>
+
+#include "VegaApplication.h"
+
 
 int main(int argc, char **argv) {
+    std::cout << "Vega Win32 Main" << std::endl;
 
-    std::cout << "Vega Win32 Application" << std::endl;
+    // Create the application
+    const auto app = std::make_unique<vega::VegaApplication>();
+    app->initialize();
 
-    // Call the hello function which creates the SDL3 window with Vulkan
-    //polaris::Renderer *renderer = new polaris::Renderer();
-
-    /*while (true) {
-        renderer->render();
-    }*/
-    hello();
     return 0;
 }
 
