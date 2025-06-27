@@ -18,12 +18,4 @@ namespace vega {
         // Then call base class OnCreated
         polaris::Application::OnCreated();
     }
-
-    void VegaApplication::shutdown() {
-        // Print Vega-specific cleanup first
-        std::cout << "VegaApplication shutting down." << std::endl;
-
-        // Then call base class shutdown
-        polaris::Application::shutdown();
-    }
 } // namespace vega

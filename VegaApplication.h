@@ -11,7 +11,6 @@ public:
     ~VegaApplication() override;
 
     void OnCreated() override;
-    void shutdown() override;
 };
 
 } // namespace vega

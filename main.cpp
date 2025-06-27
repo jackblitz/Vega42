@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
     // Create the application
     const auto app = std::make_unique<vega::VegaApplication>();
     app->initialize();
+    app->run();
 
     return 0;
 }
