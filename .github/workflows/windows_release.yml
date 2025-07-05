@@ -26,7 +26,7 @@ jobs:
 
     - name: Configure and Build Project
       run: |
-        .\build.bat Release # Assuming build.bat takes Release as an argument for release build
+        .\build.bat -release # Assuming build.bat takes Release as an argument for release build
 
     - name: Create Release
       id: create_release
