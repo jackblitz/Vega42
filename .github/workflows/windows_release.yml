@@ -14,7 +14,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: 'recursive' # Important if polaris and vega42 are submodules
-        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }} # This line is key
         
 
     - name: Add MSBuild to PATHpola
