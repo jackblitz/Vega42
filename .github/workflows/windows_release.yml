@@ -15,8 +15,9 @@ jobs:
       with:
         submodules: 'recursive' # Important if polaris and vega42 are submodules
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }} # This line is key
+        
 
-    - name: Add MSBuild to PATH
+    - name: Add MSBuild to PATHpola
       uses: microsoft/setup-msbuild@v2
 
     - name: Setup CMake
@@ -26,7 +27,6 @@ jobs:
 
     - name: Configure and Build Project
       run: |
-        cd dev
         .\build.bat Release # Assuming build.bat takes Release as an argument for release build
 
     - name: Create Release
@@ -48,16 +48,6 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dev/build/Release/Vega42.exe # Adjust path if needed
         asset_name: Vega42.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset - SDL3.dll
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dev/build/Release/SDL3.dll # Adjust path if needed
-        asset_name: SDL3.dll
         asset_content_type: application/octet-stream
 
     # Add more steps here to upload other necessary build artifacts (e.g., libPolarisEngine.a, vega42.log)
