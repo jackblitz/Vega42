@@ -47,7 +47,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: vs_build/Release/SDL3.dll # Adjust path if needed
+        asset_path: build/Release/ # Adjust path if needed
         asset_name: Vega42.exe
         asset_content_type: application/octet-stream
 
