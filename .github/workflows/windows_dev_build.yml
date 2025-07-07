@@ -32,7 +32,7 @@ jobs:
         dir vs_build\Debug
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: Vega42-debug-build
         path: vs_build/Debug/
