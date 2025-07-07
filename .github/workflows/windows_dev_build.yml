@@ -41,7 +41,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Vega42-debug-build
-        path: vs_build/Debug/Vega42.exe
+        path: vs_build/Debug/
 
     - name: Create Debug Tag
       uses: actions/github-script@v6
