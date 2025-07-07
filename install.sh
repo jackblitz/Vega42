@@ -10,7 +10,7 @@ elif [ "$1" != "-debug" ] && [ ! -z "$1" ]; then
     exit 1
 fi
 
-BUILD_DIR="vs_build/$BUILD_TYPE"
+BUILD_DIR="bin/$BUILD_TYPE"
 
 echo "Configuring for $BUILD_TYPE build in $BUILD_DIR directory..."
 

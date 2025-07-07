@@ -13,7 +13,7 @@ if /I "%1"=="-release" (
     )
 )
 
-set BUILD_DIR=vs_build\%BUILD_TYPE%
+set BUILD_DIR=bin\%BUILD_TYPE%
 
 echo "Configuring for %BUILD_TYPE% build in %BUILD_DIR% directory..."
 
@@ -22,6 +22,6 @@ if not exist %BUILD_DIR% (
 )
 
 cd %BUILD_DIR%
-cmake ../.. -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+cmake ../.. -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -G "Visual Studio 17 2022"
 
 endlocal
