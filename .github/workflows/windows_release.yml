@@ -5,7 +5,6 @@ on:
     branches:
       - main
 
-
 jobs:
   build:
     runs-on: windows-latest
@@ -13,51 +12,42 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive' # Important if polaris and vega42 are submodules
-        
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
 
-    - name: Add MSBuild to PATHpola
-      uses: microsoft/setup-msbuild@v2
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.x'
 
-    - name: Setup CMake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.x' # Use a recent CMake version
+      - name: Configure Project
+        run: |
+          .\install.bat -release
+      - name: Build Project
+        run: |
+          .\build.bat -release
+      - name: List Build Output
+        run: |
+          dir build\release
 
-    - name: Configure Project
-      run: |
-        .\install.bat -release
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vega42-release-build
+          path: build/Release/
 
-    - name: Build Project
-      run: |
-        .\build.bat -release
-
-    - name: List Build Output
-      run: |
-    - name: List Build Output
-      run: |
-        dir bin\release
-
-    - name: Prepare Release Assets
-      run: |
-        mkdir release_assets
-        copy bin\release\Vega42.exe release_assets\Vega42.exe
-
-
-    - name: Create Zip Archive
-      run: |
-        7z a Vega42-windows.zip release_assets\
-
-    - name: Upload Release Asset - Vega42.zip
-      uses: actions/upload-release-asset@v3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: Vega42-windows.zip
-        asset_name: Vega42-windows.zip
-        asset_content_type: application/zip
+      - name: Create Debug Tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/debug-v${{ github.run_number }}`,
+              sha: context.sha
+            })
