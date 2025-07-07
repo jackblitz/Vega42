@@ -33,13 +33,13 @@ jobs:
           .\build.bat -debug
       - name: List Build Output
         run: |
-          dir build\Debug
+          dir build\debug
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Vega42-debug-build
-          path: build/Debug/
+          path: build/debug/
 
       - name: Create Debug Tag
         uses: actions/github-script@v6

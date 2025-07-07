@@ -34,12 +34,12 @@ jobs:
 
     - name: List Build Output
       run: |
-        ls -R build/Release
+        ls -R build/release
 
     - name: Prepare Release Assets
       run: |
         mkdir release_assets
-        cp build/Release/Vega42 release_assets/Vega42
+        cp build/release/Vega42 release_assets/Vega42
 
     - name: Create Tar.gz Archive
       run: |
