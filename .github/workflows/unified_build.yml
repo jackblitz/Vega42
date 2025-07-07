@@ -60,7 +60,7 @@ jobs:
           # Copy PDB for Windows Debug builds
           if [[ "${{ matrix.os }}" == "windows-latest" && "${{ matrix.build_type }}" == "debug" ]]; then
             cp build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
-          fi
+     
 
       - name: Create Archive (Linux/macOS)
         if: matrix.os != 'windows-latest'
