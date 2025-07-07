@@ -23,7 +23,11 @@ jobs:
       with:
         cmake-version: '3.x'
 
-    - name: Configure and Build Project
+    - name: Configure Project
+      run: |
+        .\install.bat -debug
+
+    - name: Build Project
       run: |
         .\build.bat -debug
 
