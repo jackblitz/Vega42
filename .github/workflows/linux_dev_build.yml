@@ -1,0 +1,50 @@
+name: Linux Dev Build
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.x'
+
+      - name: Configure Project
+        run: |
+          ./install.sh -debug
+      - name: Build Project
+        run: |
+          ./build.sh -debug
+      - name: List Build Output
+        run: |
+          ls -R build/Debug
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vega42-linux-debug-build
+          path: build/Debug/
+
+      - name: Create Debug Tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/debug-linux-v${{ github.run_number }}`,
+              sha: context.sha
+            })
