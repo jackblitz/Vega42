@@ -26,13 +26,17 @@ jobs:
       with:
         cmake-version: '3.x' # Use a recent CMake version
 
-    - name: Configure and Build Project
+    - name: Configure Project
       run: |
-        .\build.bat -release # Assuming build.bat takes Release as an argument for release build
+        .\install.bat -release
+
+    - name: Build Project
+      run: |
+        .\build.bat -release
 
     - name: List Build Output
       run: |
-        dir build\release
+        dir vs_build\release
 
     - name: Create Release
       id: create_release
@@ -45,14 +49,24 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset - Vega42.exe
-      uses: actions/upload-release-asset@v1
+    - name: Prepare Release Assets
+      run: |
+        mkdir release_assets
+        copy vs_build\release\Vega42.exe release_assets\Vega42.exe
+        copy vs_build\release\Vega42.pdb release_assets\Vega42.pdb
+
+    - name: Create Zip Archive
+      run: |
+        7z a Vega42-windows.zip release_assets\
+
+    - name: Upload Release Asset - Vega42.zip
+      uses: actions/upload-release-asset@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/release/ # Adjust path if needed
-        asset_name: Vega42.exe
-        asset_content_type: application/octet-stream
+        asset_path: Vega42-windows.zip
+        asset_name: Vega42-windows.zip
+        asset_content_type: application/zip
 
     # Add more steps here to upload other necessary build artifacts (e.g., libPolarisEngine.a, vega42.log)
