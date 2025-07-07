@@ -40,3 +40,14 @@ jobs:
       with:
         name: Vega42-debug-build
         path: vs_build/Debug/
+
+    - name: Create Debug Tag
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `refs/tags/debug-v${{ github.run_number }}`,
+            sha: context.sha
+          })
