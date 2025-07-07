@@ -1,0 +1,126 @@
+name: Unified Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build_artifacts:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: ${{ github.ref == 'refs/heads/main' && fromJson('["release"]') || fromJson('["debug"]') }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Add MSBuild to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.x'
+
+      - name: Make scripts executable (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          chmod +x install.sh
+          chmod +x build.sh
+
+      - name: Configure Project
+        run: |
+          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+
+      - name: Build Project
+        run: |
+          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+
+      - name: List Build Output (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          dir build\${{ matrix.build_type }}
+
+      - name: List Build Output (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          ls -R build/${{ matrix.build_type }}
+
+      - name: Prepare Artifact
+        run: |
+          mkdir artifact_staging
+          cp build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
+
+      - name: Copy PDB for Windows Debug builds
+        if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
+          
+
+      - name: Create Archive (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          tar -czvf Vega42-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz -C artifact_staging .
+
+      - name: Create Zip Archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          7z a Vega42-windows-${{ matrix.build_type }}.zip artifact_staging\
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vega42-${{ matrix.os }}-${{ matrix.build_type }}
+          path: |
+            ${{ (matrix.os == 'windows-latest' && format('Vega42-windows-{0}.zip', matrix.build_type)) || format('Vega42-{0}-{1}.tar.gz', matrix.os, matrix.build_type) }}
+
+  create_github_release:
+    needs: build_artifacts
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      - name: List Downloaded Artifacts
+        run: ls -R
+
+      - name: Create GitHub ${{ matrix.build_type }}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: |
+            ./Vega42-windows-Release.zip
+            ./Vega42-ubuntu-latest-Release.tar.gz
+            ./Vega42-macos-latest-Release.tar.gz
+          asset_name: |
+            Vega42-windows-Release.zip
+            Vega42-ubuntu-latest-Release.tar.gz
+            Vega42-macos-latest-Release.tar.gz
+          asset_content_type: |
+            application/zip
+            application/gzip
+            application/gzip
