@@ -22,6 +22,11 @@ jobs:
         with:
           cmake-version: '3.x'
 
+      - name: Make scripts executable
+        run: |
+          chmod +x install.sh
+          chmod +x build.sh
+
       - name: Configure Project
         run: |
           ./install.sh -debug
