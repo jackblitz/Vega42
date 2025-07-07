@@ -36,24 +36,16 @@ jobs:
 
     - name: List Build Output
       run: |
-        dir vs_build\release
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }} # Example tag, you might want to use semantic versioning
-        release_name: Release Build ${{ github.run_number }}
-        draft: false
-        prerelease: false
+    - name: List Build Output
+      run: |
+        dir bin\release
 
     - name: Prepare Release Assets
       run: |
         mkdir release_assets
-        copy vs_build\release\Vega42.exe release_assets\Vega42.exe
-        copy vs_build\release\Vega42.pdb release_assets\Vega42.pdb
+        copy bin\release\Vega42.exe release_assets\Vega42.exe
+        copy bin\release\Vega42.pdb release_assets\Vega42.pdb
+
 
     - name: Create Zip Archive
       run: |
