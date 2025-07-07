@@ -26,17 +26,13 @@ jobs:
       with:
         cmake-version: '3.x' # Use a recent CMake version
 
-    - name: Configure Project
+    - name: Configure and Build Project
       run: |
-        .\install.bat -release
-
-    - name: Build Project
-      run: |
-        .\build.bat -release
+        .\build.bat -release # Assuming build.bat takes Release as an argument for release build
 
     - name: List Build Output
       run: |
-        dir vs_build\release
+        dir build\release
 
     - name: Create Release
       id: create_release
@@ -50,12 +46,12 @@ jobs:
         prerelease: false
 
     - name: Upload Release Asset - Vega42.exe
-      uses: actions/upload-release-asset@v4
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: vs_build/release/Vega42.exe
+        asset_path: build/release/ # Adjust path if needed
         asset_name: Vega42.exe
         asset_content_type: application/octet-stream
 
