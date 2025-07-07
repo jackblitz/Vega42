@@ -35,13 +35,13 @@ jobs:
 
     - name: List Build Output
       run: |
-        dir bin\Debug
+        dir vs_build\Debug
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Vega42-debug-build
-        path: bin/Debug/Vega42.exe
+        path: vs_build/Debug/
 
     - name: Create Debug Tag
       uses: actions/github-script@v6
