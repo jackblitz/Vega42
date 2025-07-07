@@ -57,8 +57,11 @@ jobs:
         run: |
           mkdir artifact_staging
           cp build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
-          # Copy PDB for Windows Debug builds
-          if ("${{ matrix.os }}" -eq "windows-latest" -and "${{ matrix.build_type }}" -eq "Debug") { Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/ }
+
+      - name: Copy PDB for Windows Debug builds
+        if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
           
 
       - name: Create Archive (Linux/macOS)
