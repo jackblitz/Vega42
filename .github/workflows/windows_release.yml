@@ -53,7 +53,7 @@ jobs:
         7z a Vega42-windows.zip release_assets\
 
     - name: Upload Release Asset - Vega42.zip
-      uses: actions/upload-release-asset@v4
+      uses: actions/upload-release-asset@v3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
