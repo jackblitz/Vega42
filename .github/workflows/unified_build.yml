@@ -37,11 +37,11 @@ jobs:
 
       - name: Configure Project
         run: |
-          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'debug' || 'release' }}
+          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ toLower(matrix.build_type) }}
 
       - name: Build Project
         run: |
-          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'debug' || 'release' }}
+          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
 
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
