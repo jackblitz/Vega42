@@ -37,11 +37,11 @@ jobs:
 
       - name: Configure Project
         run: |
-          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'debug' || 'release' }}
 
       - name: Build Project
         run: |
-          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'debug' || 'release' }}
 
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
@@ -93,7 +93,7 @@ jobs:
       - name: List Downloaded Artifacts
         run: ls -R
 
-      - name: Create GitHub Release
+      - name: Create GitHub ${{ matrix.build_type }}
         id: create_release
         uses: actions/create-release@v1
         env:
