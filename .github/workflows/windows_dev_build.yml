@@ -12,48 +12,42 @@ jobs:
       contents: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
 
-    - name: Setup CMake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.x'
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.x'
 
-    - name: Configure Project
-      run: |
-        .\install.bat -debug
+      - name: Configure Project
+        run: |
+          .\install.bat -debug
+      - name: Build Project
+        run: |
+          .\build.bat -debug
+      - name: List Build Output
+        run: |
+          dir build\Debug
 
-    - name: Build Project
-      run: |
-        .\build.bat -debug
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vega42-debug-build
+          path: build/Debug/
 
-    - name: List Build Output
-      run: |
-        dir bin\Debug
-
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Vega42-debug-build
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Vega42-debug-build
-        path: bin/Debug/Vega42.exe
-
-    - name: Create Debug Tag
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: `refs/tags/debug-v${{ github.run_number }}`,
-            sha: context.sha
-          })
+      - name: Create Debug Tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/debug-v${{ github.run_number }}`,
+              sha: context.sha
+            })
