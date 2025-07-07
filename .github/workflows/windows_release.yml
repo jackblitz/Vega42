@@ -1,0 +1,58 @@
+name: Windows Release Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive' # Important if polaris and vega42 are submodules
+        
+
+    - name: Add MSBuild to PATHpola
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '3.x' # Use a recent CMake version
+
+    - name: Configure and Build Project
+      run: |
+        .\build.bat -release # Assuming build.bat takes Release as an argument for release build
+
+    - name: List Build Output
+      run: |
+        dir build\release
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }} # Example tag, you might want to use semantic versioning
+        release_name: Release Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset - Vega42.exe
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/release/ # Adjust path if needed
+        asset_name: Vega42.exe
+        asset_content_type: application/octet-stream
+
+    # Add more steps here to upload other necessary build artifacts (e.g., libPolarisEngine.a, vega42.log)
