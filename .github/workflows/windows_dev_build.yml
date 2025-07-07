@@ -1,9 +1,9 @@
-name: Windows Release Build
+name: Windows Dev Build
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   build:
@@ -27,19 +27,19 @@ jobs:
 
       - name: Configure Project
         run: |
-          .\install.bat -release
+          .\install.bat -debug
       - name: Build Project
         run: |
-          .\build.bat -release
+          .\build.bat -debug
       - name: List Build Output
         run: |
-          dir build\release
+          dir build\Debug
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Vega42-release-build
-          path: build/Release/
+          name: Vega42-debug-build
+          path: build/Debug/
 
       - name: Create Debug Tag
         uses: actions/github-script@v6

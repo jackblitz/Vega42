@@ -13,11 +13,10 @@ if /I "%1"=="-release" (
     )
 )
 
-set BUILD_DIR=vs_build\%BUILD_TYPE%
-
+set BUILD_DIR=bin\%BUILD_TYPE%
 
 
 echo "Building %BUILD_TYPE% configuration..."
-cmake --build %BUILD_DIR%
+cmake --build %BUILD_DIR% --config %BUILD_TYPE%
 
 endlocal

@@ -10,7 +10,7 @@ elif [ "$1" != "-debug" ] && [ ! -z "$1" ]; then
     exit 1
 fi
 
-BUILD_DIR="vs_build/$BUILD_TYPE"
+BUILD_DIR="bin/$BUILD_TYPE"
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "Build directory $BUILD_DIR does not exist."
@@ -19,4 +19,4 @@ if [ ! -d "$BUILD_DIR" ]; then
 fi
 
 echo "Building $BUILD_TYPE configuration..."
-cmake --build "$BUILD_DIR"
+cmake --build "$BUILD_DIR" --config "$BUILD_TYPE"
