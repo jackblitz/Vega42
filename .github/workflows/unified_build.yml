@@ -115,6 +115,14 @@ jobs:
         run: |
           mkdir artifact_staging
           cp build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
+      - name: Copy SDL3 DLL (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/SDL3.dll artifact_staging/
+      - name: Copy SDL3 Shared Library (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cp bin/${{ matrix.build_type }}/libSDL3.so artifact_staging/ || cp bin/${{ matrix.build_type }}/libSDL3.dylib artifact_staging/
       - name: Copy PDB for Windows Debug builds
         if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
         run: |
@@ -158,21 +166,32 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Assets
+      - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: |
-            ./Vega42-windows-latest-release.zip
-            ./Vega42-ubuntu-latest-release.tar.gz
-            ./Vega42-macos-latest-release.tar.gz
-          asset_name: |
-            Vega42-windows-latest-release.zip
-            Vega42-ubuntu-latest-release.tar.gz
-            Vega42-macos-latest-release.tar.gz
-          asset_content_type: |
-            application/zip
-            application/gzip
-            application/gzip
+          asset_path: ./Vega42-windows-latest-release/Vega42-windows-release.zip
+          asset_name: Vega42-windows-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Ubuntu Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Vega42-ubuntu-latest-release/Vega42-ubuntu-latest-release.tar.gz
+          asset_name: Vega42-ubuntu-latest-release.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Vega42-macos-latest-release/Vega42-macos-latest-release.tar.gz
+          asset_name: Vega42-macos-latest-release.tar.gz
+          asset_content_type: application/gzip
