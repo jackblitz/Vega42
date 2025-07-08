@@ -41,9 +41,6 @@ jobs:
         run: |
           chmod +x install.sh
           chmod +x build.sh
-      - name: List contents of dev directory
-        run: |
-          ls -R dev
       - name: Configure Project
         run: |
           ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
