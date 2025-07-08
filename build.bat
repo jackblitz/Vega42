@@ -1,10 +1,10 @@
 @echo off
 setlocal
 
-set BUILD_TYPE=Debug
+set BUILD_TYPE=debug
 
 if /I "%1"=="-release" (
-    set BUILD_TYPE=Release
+    set BUILD_TYPE=release
 ) else if /I NOT "%1"=="-debug" (
     if NOT "%1"=="" (
         echo "Invalid argument: %1"

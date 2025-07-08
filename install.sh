@@ -1,9 +1,9 @@
 #!/bin/bash
 
-BUILD_TYPE="Debug" # Default value
+BUILD_TYPE="debug" # Default value
 
 if [ "$1" == "-release" ]; then
-    BUILD_TYPE="Release"
+    BUILD_TYPE="release"
 elif [ "$1" != "-debug" ] && [ ! -z "$1" ]; then
     echo "Invalid argument: $1"
     echo "Usage: ./install.sh [-debug | -release]"
