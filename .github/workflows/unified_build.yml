@@ -49,19 +49,19 @@ jobs:
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          dir dev\app\build\${{ matrix.build_type }}
+          dir \build\${{ matrix.build_type }}
       - name: List Build Output (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
-          ls -R dev/app/build/${{ matrix.build_type }}
+          ls -R build/${{ matrix.build_type }}
       - name: Prepare Artifact
         run: |
           mkdir artifact_staging
-          cp dev/app/build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
+          cp /build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
       - name: Copy PDB for Windows Debug builds
         if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
         run: |
-          Copy-Item dev/app/build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
+          Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
 
       - name: Create Archive (Linux/macOS)
         if: matrix.os != 'windows-latest'
