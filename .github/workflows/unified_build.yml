@@ -15,6 +15,8 @@ jobs:
         build_type: ${{ github.ref == 'refs/heads/main' && fromJson('["release"]') || fromJson('["debug"]') }}
 
     steps:
+      - name: Print Working Directory
+        run: pwd
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -29,6 +31,65 @@ jobs:
         with:
           cmake-version: '3.x'
 
+      - name: Setup Vulkan Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
+          $INSTALL_DIR = "$PWD/vulkansdk"
+          $installer_args = "--root", "$INSTALL_DIR", "--accept-licenses", "--default-answer", "--confirm-command", "install"
+          Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
+
+          echo "--- Contents of installation directory ---"
+          ls -R "$INSTALL_DIR"
+
+          if (Test-Path "$INSTALL_DIR") {
+            echo "Found Vulkan SDK directory."
+            echo "VULKAN_SDK=$INSTALL_DIR" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            echo "$INSTALL_DIR\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            echo "Error: Vulkan SDK directory not found after install."
+            exit 1
+          }
+
+      - name: Setup Vulkan macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          curl -L -o vulkansdk-macos.zip https://sdk.lunarg.com/sdk/download/1.4.313.1/mac/vulkansdk-macos-1.4.313.1.zip
+          unzip vulkansdk-macos.zip
+
+          INSTALLER_APP="vulkansdk-macOS-1.4.313.1.app"
+          INSTALL_DIR="$PWD/vulkansdk"
+          mkdir -p "$INSTALL_DIR"
+
+          echo "--- Running Vulkan SDK Installer ---"
+          sudo ./${INSTALLER_APP}/Contents/MacOS/vulkansdk-macOS-1.4.313.1 --root "$INSTALL_DIR" --accept-licenses --default-answer --confirm-command install
+
+          echo "--- Contents of installation directory ---"
+          ls -R "$INSTALL_DIR"
+
+          # The actual SDK is now in $INSTALL_DIR/macOS
+          if [ -d "$INSTALL_DIR/macOS" ]; then
+            echo "Found Vulkan SDK directory."
+            echo "VULKAN_SDK=$INSTALL_DIR/macOS" >> $GITHUB_ENV
+            echo "$INSTALL_DIR/macOS/bin" >> $GITHUB_PATH
+            echo "DYLD_LIBRARY_PATH=$INSTALL_DIR/macOS/lib" >> $GITHUB_ENV
+          else
+            echo "Error: Vulkan SDK directory not found after install."
+            exit 1
+          fi
+
+      - name: Verify Environment Variables (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          printenv
+
+      - name: Install SDL3 Build Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git make pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev libvulkan-dev vulkan-tools
+
+
       - name: Make scripts executable (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
@@ -37,9 +98,11 @@ jobs:
       - name: Configure Project
         run: |
           ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
       - name: Build Project
         run: |
           ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
@@ -56,7 +119,6 @@ jobs:
         if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
         run: |
           Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
-
       - name: Create Archive (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
@@ -103,13 +165,13 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: |
-            ./Vega42-windows-Release.zip
-            ./Vega42-ubuntu-latest-Release.tar.gz
-            ./Vega42-macos-latest-Release.tar.gz
+            ./Vega42-windows-release.zip
+            ./Vega42-ubuntu-latest-release.tar.gz
+            ./Vega42-macos-latest-release.tar.gz
           asset_name: |
-            Vega42-windows-Release.zip
-            Vega42-ubuntu-latest-Release.tar.gz
-            Vega42-macos-latest-Release.tar.gz
+            Vega42-windows-release.zip
+            Vega42-ubuntu-latest-release.tar.gz
+            Vega42-macos-latest-release.tar.gz
           asset_content_type: |
             application/zip
             application/gzip
