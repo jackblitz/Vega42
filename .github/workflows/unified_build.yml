@@ -44,7 +44,7 @@ jobs:
         run: mkdir -p dev/app/cmake_build
 
       - name: Configure CMake
-        run: cmake -S dev/app -B dev/app/cmake_build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        run: cmake -S ${{ github.workspace }}/dev/app -B dev/app/cmake_build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build Project
         run: cmake --build dev/app/cmake_build --config ${{ matrix.build_type }}
