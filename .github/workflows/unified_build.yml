@@ -49,11 +49,11 @@ jobs:
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          dir build\${{ matrix.build_type }}
+          dir dev\app\build\${{ matrix.build_type }}
       - name: List Build Output (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
-          ls -R build/${{ matrix.build_type }}
+          ls -R dev/app/build/${{ matrix.build_type }}
       - name: Prepare Artifact
         run: |
           mkdir artifact_staging
