@@ -50,7 +50,9 @@ jobs:
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
+          pushd dev\app
           dir build\${{ matrix.build_type }}
+          popd
       - name: List Build Output (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
