@@ -20,10 +20,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Install Visual Studio C++ Build Tools (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
       - name: Add MSBuild to PATH (Windows)
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v2
@@ -48,9 +44,11 @@ jobs:
       - name: Configure Project
         run: |
           ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
       - name: Build Project
         run: |
           ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
@@ -113,13 +111,13 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: |
-            ./Vega42-windows-Release.zip
-            ./Vega42-ubuntu-latest-Release.tar.gz
-            ./Vega42-macos-latest-Release.tar.gz
+            ./Vega42-windows-release.zip
+            ./Vega42-ubuntu-latest-release.tar.gz
+            ./Vega42-macos-latest-release.tar.gz
           asset_name: |
-            Vega42-windows-Release.zip
-            Vega42-ubuntu-latest-Release.tar.gz
-            Vega42-macos-latest-Release.tar.gz
+            Vega42-windows-release.zip
+            Vega42-ubuntu-latest-release.tar.gz
+            Vega42-macos-latest-release.tar.gz
           asset_content_type: |
             application/zip
             application/gzip
