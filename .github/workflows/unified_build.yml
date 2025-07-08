@@ -35,8 +35,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: humbletim/install-vulkan-sdk@v1.2
         with:
-          version: 'latest'
+          version: '1.4.313.2'
           cache: true
+
       - name: Install SDL3 Build Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
