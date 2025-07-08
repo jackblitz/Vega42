@@ -31,12 +31,19 @@ jobs:
         with:
           cmake-version: '3.x'
 
-      - name: Setup Vulkan
+      - name: Setup Vulkan Windows
         if: matrix.os == 'windows-latest'
         run: |
           Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
           $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
           $installer.WaitForExit();
+
+      - name: Setup Vulkan macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          curl -L -o vulkansdk-macos.zip https://sdk.lunarg.com/sdk/download/1.4.313.1/mac/vulkansdk-macos-1.4.313.1.zip
+          unzip vulkansdk-macos.zip
+          echo "VULKAN_SDK=$PWD/vulkansdk-macos-1.4.313.1/macOS" >> $GITHUB_ENV
 
       - name: Install SDL3 Build Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
