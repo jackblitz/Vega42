@@ -35,8 +35,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
-          $installer_args = "--root", "$PWD/vulkansdk", "--accept-licenses", "--default-answer", "--confirm-command", "install"
+          $INSTALL_DIR = "$PWD/vulkansdk"
+          $installer_args = "--root", "$INSTALL_DIR", "--accept-licenses", "--default-answer", "--confirm-command", "install"
           Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
+
+          echo "--- Contents of installation directory ---"
+          ls -R "$INSTALL_DIR"
+
+          if (Test-Path "$INSTALL_DIR") {
+            echo "Found Vulkan SDK directory."
+            echo "VULKAN_SDK=$INSTALL_DIR" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            echo "$INSTALL_DIR\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            echo "Error: Vulkan SDK directory not found after install."
+            exit 1
+          }
 
       - name: Setup Vulkan macOS
         if: matrix.os == 'macos-latest'
