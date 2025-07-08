@@ -115,6 +115,14 @@ jobs:
         run: |
           mkdir artifact_staging
           cp build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
+      - name: Copy SDL3 DLL (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/SDL3.dll artifact_staging/
+      - name: Copy SDL3 Shared Library (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cp build/${{ matrix.build_type }}/libSDL3.so artifact_staging/ || cp build/${{ matrix.build_type }}/libSDL3.dylib artifact_staging/
       - name: Copy PDB for Windows Debug builds
         if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
         run: |
