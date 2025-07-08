@@ -31,12 +31,12 @@ jobs:
         with:
           cmake-version: '3.x'
 
-      - name: Install Vulkan SDK (Windows)
+      - name: Setup Vulkan
         if: matrix.os == 'windows-latest'
-        uses: humbletim/install-vulkan-sdk@v1.2
-        with:
-          version: '1.4.313.2'
-          cache: true
+        run: |
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.1.126.0/windows/VulkanSDK-1.1.126.0-Installer.exe" -OutFile VulkanSDK.exe
+          $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
+          $installer.WaitForExit();
 
       - name: Install SDL3 Build Dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
