@@ -35,8 +35,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
-          $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
-          $installer.WaitForExit();
+          $installer_args = "--root", "$PWD/vulkansdk", "--accept-licenses", "--default-answer", "--confirm-command", "install"
+          Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
 
       - name: Setup Vulkan macOS
         if: matrix.os == 'macos-latest'
