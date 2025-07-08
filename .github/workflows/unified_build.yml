@@ -40,12 +40,14 @@ jobs:
         run: |
           chmod +x install.sh
           chmod +x build.sh
-      - name: Configure Project
-        run: |
-          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+      - name: Create Build Directory
+        run: mkdir -p dev/app/cmake_build
+
+      - name: Configure CMake
+        run: cmake -S dev/app -B dev/app/cmake_build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
       - name: Build Project
-        run: |
-          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        run: cmake --build dev/app/cmake_build --config ${{ matrix.build_type }}
       - name: List Build Output (Windows)
         if: matrix.os == 'windows-latest'
         run: |
