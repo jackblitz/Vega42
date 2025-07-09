@@ -37,17 +37,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install CMake in the Android SDK
-        # This is the same version of cmake that is found in build.gradle. This
-        # will be used to build libavif and the JNI bindings.
-        run: sdkmanager "cmake;3.30.3"
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 35
           ndk: 26.1.10909125 # A recent NDK version compatible with API 35
-          cmake: 3.30.3
+
+      - name: Install CMake in the Android SDK
+        # This is the same version of cmake that is found in build.gradle. This
+        # will be used to build libavif and the JNI bindings.
+        run: sdkmanager "cmake;3.30.3"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
