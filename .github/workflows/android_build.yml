@@ -37,17 +37,14 @@ jobs:
         run: |
           echo "ANDROID_HOME: ${{ env.ANDROID_HOME }}"
           ls -l ${{ env.ANDROID_HOME }}/cmake/
-          find ${{ env.ANDROID_HOME }} -name cmake -type f
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: app/platform/android
 
       - name: Build Android Release APK
-        run: ./gradlew assembleRelease
-        working-directory: app/platform/android
-        env:
-          ANDROID_CMAKE_PATH: ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
+        run: ./gradlew assembleRelease -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.31.5/bin
+        working-directory: app/platform/android/app
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
