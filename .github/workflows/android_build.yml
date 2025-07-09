@@ -28,7 +28,11 @@ jobs:
         with:
           api-level: 35
           ndk: 26.1.10909125 # A recent NDK version compatible with API 35
-          cmake: 3.30.3
+
+      - name: Install CMake in the Android SDK
+        # This is the same version of cmake that is found in build.gradle. This
+        # will be used to build libavif and the JNI bindings.
+        run: sdkmanager "cmake;3.30.3"
 
       - name: Debug Environment Variables
         run: printenv
@@ -39,8 +43,6 @@ jobs:
           echo "Listing CMake versions installed by setup-android action:"
           ls -l ${{ env.ANDROID_HOME }}/cmake/
           echo "-----------------"
-          echo "Default system CMake version:"
-          /usr/bin/cmake --version
           echo "-----------------"
           echo "CMake version configured by setup-android action:"
           ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin/cmake --version
