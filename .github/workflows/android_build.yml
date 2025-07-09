@@ -27,7 +27,8 @@ jobs:
         run: chmod +x app/platform/android/gradlew
 
       - name: Build Android Release APK
-        run: ./app/platform/android/gradlew assembleRelease
+        run: ./gradlew assembleRelease
+        working-directory: app/platform/android/app
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
