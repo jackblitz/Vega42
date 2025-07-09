@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Android Release APK
         run: ./gradlew assembleRelease
-        working-directory: app/platform/android/app
+        working-directory: app/platform/android
         env:
           ANDROID_CMAKE_PATH: ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
 
