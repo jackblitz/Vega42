@@ -43,7 +43,7 @@ jobs:
         working-directory: app/platform/android
 
       - name: Build Android Release APK
-        run: ./gradlew assembleRelease -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.31.5/bin
+        run: ./gradlew assembleRelease -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
         working-directory: app/platform/android
 
       - name: Upload Release APK
