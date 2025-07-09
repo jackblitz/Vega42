@@ -31,9 +31,6 @@ android {
         cmake {
             path '../../../../CMakeLists.txt'
             version = "3.30.3" // Or any version >= 3.30.0
-            if (System.getenv('ANDROID_CMAKE_PATH')) {
-                cmake.path = System.getenv('ANDROID_CMAKE_PATH')
-            }
         }
     }
 
