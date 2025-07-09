@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - android_support
 
 jobs:
   build_android:
