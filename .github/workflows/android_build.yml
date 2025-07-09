@@ -55,11 +55,6 @@ jobs:
         run: ./gradlew assembleRelease -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
         working-directory: app/platform/android
 
-      - name: List build output directory
-        run: |
-          echo "Listing contents of build output directory..."
-          ls -R app/platform/android/build/outputs
-
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
