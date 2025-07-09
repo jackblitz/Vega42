@@ -26,6 +26,7 @@ if(ANDROID)
     # When building for Android, create the Vega42 shared library.
     add_library(Vega42 SHARED
             app/main.cpp
+            app/VegaApplication.cpp
     )
     target_compile_definitions(Vega42 PRIVATE PLATFORM_ANDROID)
     target_link_libraries(Vega42 PRIVATE PolarisEngine)

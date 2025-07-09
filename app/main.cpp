@@ -1,8 +1,9 @@
 #include <iostream>
 #include "VegaApplication.h"
-#include "polaris/source/runtime/core/Logger.h" // Include the Logger header
+#include <Logger.h> // Include the Logger header
+#include <SDL3/SDL_main.h>
 
-int main() {
+int main(int argc, char *argv[]){
     // Initialize the logger at the very beginning
     polaris::Logger::getInstance().initialize("vega42.log"); // You can specify a log file name
 
