@@ -24,13 +24,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x app/platform/android/app/gradlew
+        run: chmod +x app/platform/android/gradlew
 
       - name: Build Android Release APK
-        run: ./app/platform/android/app/gradlew assembleRelease
+        run: ./app/platform/android/gradlew assembleRelease
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: android-release-apk
-          path: app/app/platform/android/app/build/outputs/apk/release/*.apk
+          path: app/app/platform/android/build/outputs/apk/release/*.apk
