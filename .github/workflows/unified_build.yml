@@ -141,8 +141,12 @@ jobs:
           name: Vega42-${{ matrix.os }}-${{ matrix.build_type }}
           path: |
             ${{ (matrix.os == 'windows-latest' && format('Vega42-windows-{0}.zip', matrix.build_type)) || format('Vega42-{0}-{1}.tar.gz', matrix.os, matrix.build_type) }}
+
+  call_android_build:
+    uses: ./.github/workflows/android_build.yml
+
   create_github_release:
-    needs: build_artifacts
+    needs: [build_artifacts, call_android_build]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
@@ -151,11 +155,13 @@ jobs:
     steps:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
 
       - name: List Downloaded Artifacts
-        run: ls -R
+        run: ls -R artifacts/
 
-      - name: Create GitHub ${{ matrix.build_type }}
+      - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -172,7 +178,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Vega42-windows-latest-release/Vega42-windows-release.zip
+          asset_path: artifacts/Vega42-windows-latest-release/Vega42-windows-release.zip
           asset_name: Vega42-windows-release.zip
           asset_content_type: application/zip
 
@@ -182,8 +188,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Vega42-ubuntu-latest-release/Vega42-ubuntu-latest-release.tar.gz
-          asset_name: Vega42-ubuntu-latest-release.tar.gz
+          asset_path: artifacts/Vega42-ubuntu-latest-release/Vega42-ubuntu-latest-release.tar.gz
+          asset_name: Vega42-ubuntu-release.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload macOS Release Asset
@@ -192,6 +198,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Vega42-macos-latest-release/Vega42-macos-latest-release.tar.gz
-          asset_name: Vega42-macos-latest-release.tar.gz
+          asset_path: artifacts/Vega42-macos-latest-release/Vega42-macos-latest-release.tar.gz
+          asset_name: Vega42-macos-release.tar.gz
           asset_content_type: application/gzip
+
+      - name: Upload Android Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/Vega42-android-release/Vega42-android-release.apk
+          asset_name: Vega42-android-release.apk
+          asset_content_type: application/vnd.android.package-archive

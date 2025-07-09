@@ -1,6 +1,14 @@
 name: Android Build
 
 on:
+  workflow_call:
+    outputs:
+      build_type:
+        description: "The type of build (release or debug)"
+        value: ${{ jobs.build_android.outputs.build_type }}
+      artifact_name:
+        description: "The name of the artifact produced"
+        value: ${{ jobs.build_android.outputs.artifact_name }}
   push:
     branches:
       - main
@@ -10,8 +18,14 @@ on:
 jobs:
   build_android:
     runs-on: ubuntu-latest
-
+    outputs:
+      build_type: ${{ steps.get_build_type.outputs.build_type }}
+      artifact_name: ${{ steps.find_apk.outputs.artifact_name }}
     steps:
+      - name: Get build type
+        id: get_build_type
+        run: echo "build_type=${{ github.ref == 'refs/heads/main' && 'release' || 'debug' }}" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -23,40 +37,45 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 35
-          ndk: 26.1.10909125 # A recent NDK version compatible with API 35
-
       - name: Install CMake in the Android SDK
         # This is the same version of cmake that is found in build.gradle. This
         # will be used to build libavif and the JNI bindings.
         run: sdkmanager "cmake;3.30.3"
 
-      - name: Debug Environment Variables
-        run: printenv
-
-      - name: Debug Android Home and CMake
-        run: |
-          echo "ANDROID_HOME: ${{ env.ANDROID_HOME }}"
-          echo "Listing CMake versions installed by setup-android action:"
-          ls -l ${{ env.ANDROID_HOME }}/cmake/
-          echo "-----------------"
-          echo "-----------------"
-          echo "CMake version configured by setup-android action:"
-          ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin/cmake --version
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 35
+          ndk: 26.1.10909125 # A recent NDK version compatible with API 35
+          cmake: 3.30.3
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: app/platform/android
 
-      - name: Build Android Release APK
-        run: ./gradlew assembleRelease -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
+      - name: Build Android APK
+        run: ./gradlew assemble${{ steps.get_build_type.outputs.build_type == 'release' && 'Release' || 'Debug' }} -Pandroid.injected.cmake.dir=${{ env.ANDROID_HOME }}/cmake/3.30.3/bin
         working-directory: app/platform/android
 
-      - name: Upload Release APK
+      - name: Find and Rename APK
+        id: find_apk
+        run: |
+          BUILD_TYPE=${{ steps.get_build_type.outputs.build_type }}
+          ARTIFACT_NAME="Vega42-android-${BUILD_TYPE}"
+          APK_DIR="app/platform/android/app/build/outputs/apk/${BUILD_TYPE}"
+          APK_FILE=$(find "${APK_DIR}" -name "*.apk" | head -n 1)
+          if [ -f "${APK_FILE}" ]; then
+            NEW_NAME="${ARTIFACT_NAME}.apk"
+            mv "${APK_FILE}" "${APK_DIR}/${NEW_NAME}"
+            echo "apk_path=${APK_DIR}/${NEW_NAME}" >> $GITHUB_OUTPUT
+            echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+          else
+            echo "APK not found in ${APK_DIR}"
+            exit 1
+          fi
+
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-apk
-          path: app/platform/android/app/build/outputs/apk/release/*.apk
+          name: ${{ steps.find_apk.outputs.artifact_name }}
+          path: ${{ steps.find_apk.outputs.apk_path }}
