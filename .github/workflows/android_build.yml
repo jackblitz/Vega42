@@ -24,33 +24,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: amyu/setup-android@v4
+        uses: android-actions/setup-android@v3
         with:
-
-        # default: 34
-        # sdk version
-        # see https://developer.android.com/studio/releases/platforms
-        # It will always be installed.
-          sdk-version: 34
-
-        # default: 33.0.2
-        # build tools version
-        # see https://developer.android.com/studio/releases/build-tools
-        # It will always be installed.
-          build-tools-version: 35.0.0
-
-        # default: ''
-        # cmake version
-        # see https://developer.android.com/studio/projects/install-ndk
-        # Installed when the version is specified
-          cmake-version: 3.30.3
-
-        # default: ''
-        # cmake version
-        # see https://developer.android.com/studio/projects/install-ndk
-        # Installed when the version is specified
-          ndk-version: 26.1.10909125
-
+          api-level: 35
+          ndk: 26.1.10909125 # A recent NDK version compatible with API 35
+          cmake: 3.30.3
 
       - name: Debug Environment Variables
         run: printenv
@@ -58,7 +36,14 @@ jobs:
       - name: Debug Android Home and CMake
         run: |
           echo "ANDROID_HOME: ${{ env.ANDROID_HOME }}"
+          echo "Listing CMake versions installed by setup-android action:"
           ls -l ${{ env.ANDROID_HOME }}/cmake/
+          echo "-----------------"
+          echo "Default system CMake version:"
+          /usr/bin/cmake --version
+          echo "-----------------"
+          echo "CMake version configured by setup-android action:"
+          ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin/cmake --version
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
