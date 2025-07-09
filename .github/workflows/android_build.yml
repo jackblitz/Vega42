@@ -30,11 +30,14 @@ jobs:
           ndk: 26.1.10909125 # A recent NDK version compatible with API 35
           cmake: 3.30.3
 
+      - name: Debug Environment Variables
+        run: printenv
+
       - name: Debug Android Home and CMake
         run: |
           echo "ANDROID_HOME: ${{ env.ANDROID_HOME }}"
           ls -l ${{ env.ANDROID_HOME }}/cmake/
-          ls -l ${{ env.ANDROID_HOME }}/cmake/3.30.3/bin/
+          find ${{ env.ANDROID_HOME }} -name cmake -type f
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
