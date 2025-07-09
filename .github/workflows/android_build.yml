@@ -24,11 +24,33 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: amyu/setup-android@v4
         with:
-          api-level: 35
-          ndk: 26.1.10909125 # A recent NDK version compatible with API 35
-          cmake: 3.30.3
+
+        # default: 34
+        # sdk version
+        # see https://developer.android.com/studio/releases/platforms
+        # It will always be installed.
+          sdk-version: 34
+
+        # default: 33.0.2
+        # build tools version
+        # see https://developer.android.com/studio/releases/build-tools
+        # It will always be installed.
+          build-tools-version: 35.0.0
+
+        # default: ''
+        # cmake version
+        # see https://developer.android.com/studio/projects/install-ndk
+        # Installed when the version is specified
+          cmake-version: 3.30.3
+
+        # default: ''
+        # cmake version
+        # see https://developer.android.com/studio/projects/install-ndk
+        # Installed when the version is specified
+          ndk-version: 26.1.10909125
+
 
       - name: Debug Environment Variables
         run: printenv
