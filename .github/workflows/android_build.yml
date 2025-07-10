@@ -38,22 +38,51 @@ jobs:
           api-level: 35
           ndk: 26.1.10909125 # A recent NDK version compatible with API 35
 
+      - name: Cache Android SDK components
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/sdk/cmake
+            ~/.android/sdk/ndk
+          key: android-sdk-${{ runner.os }}-cmake-3.30.3-ndk-26.1.10909125
+          restore-keys: |
+            android-sdk-${{ runner.os }}-cmake-3.30.3-
+            android-sdk-${{ runner.os }}-
+
       - name: Install CMake in the Android SDK
         # This is the same version of cmake that is found in build.gradle. This
         # will be used to build libavif and the JNI bindings.
         run: sdkmanager "cmake;3.30.3"
 
-      - name: Generate Release Keystore
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache native libraries build
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/platform/android/app/build/intermediates/cxx
+            app/platform/android/app/.cxx
+          key: ${{ runner.os }}-native-libs-${{ hashFiles('**/CMakeLists.txt', 'dev/app/polaris/source/third_party/**') }}
+          restore-keys: |
+            ${{ runner.os }}-native-libs-
+
+      - name: Create keystore from secret
         run: |
-          # Generate a keystore for signing the APK
-          keytool -genkey -v -keystore release.keystore -alias vega42release -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" -keypass "${{ secrets.KEY_PASSWORD }}" \
-            -dname "CN=JB, OU=Vega42, O=Polaris, L=Unknown, S=Unknown, C=US"
+          # Decode the keystore file from GitHub secrets
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release.keystore
           
           # Set environment variables for gradle
           echo "KEYSTORE_FILE=$(pwd)/release.keystore" >> $GITHUB_ENV
           echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_ALIAS=vega42release" >> $GITHUB_ENV
+          echo "KEY_ALIAS=key0" >> $GITHUB_ENV
           echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
         working-directory: app/platform/android
 

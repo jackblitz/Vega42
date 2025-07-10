@@ -31,13 +31,56 @@ jobs:
         with:
           cmake-version: '3.x'
 
+      - name: Cache CMake build directory
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            bin
+          key: ${{ runner.os }}-cmake-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt', 'dev/app/polaris/source/third_party/**') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-${{ matrix.build_type }}-
+            ${{ runner.os }}-cmake-
+
+      - name: Cache Vulkan SDK (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v4
+        with:
+          path: vulkansdk
+          key: ${{ runner.os }}-vulkan-sdk-1.4.313.2
+          restore-keys: |
+            ${{ runner.os }}-vulkan-sdk-
+
+      - name: Cache Vulkan SDK (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/cache@v4
+        with:
+          path: vulkansdk
+          key: ${{ runner.os }}-vulkan-sdk-1.4.313.1
+          restore-keys: |
+            ${{ runner.os }}-vulkan-sdk-
+
+      - name: Cache Linux system packages
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-cache-${{ hashFiles('**/workflows/unified_build.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-cache-
+
       - name: Setup Vulkan Windows
         if: matrix.os == 'windows-latest'
         run: |
-          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
           $INSTALL_DIR = "$PWD/vulkansdk"
-          $installer_args = "--root", "$INSTALL_DIR", "--accept-licenses", "--default-answer", "--confirm-command", "install"
-          Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
+          if (Test-Path "$INSTALL_DIR") {
+            echo "Using cached Vulkan SDK"
+          } else {
+            echo "Downloading and installing Vulkan SDK"
+            Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
+            $installer_args = "--root", "$INSTALL_DIR", "--accept-licenses", "--default-answer", "--confirm-command", "install"
+            Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
+          }
 
           echo "--- Contents of installation directory ---"
           ls -R "$INSTALL_DIR"
@@ -54,13 +97,18 @@ jobs:
       - name: Setup Vulkan macOS
         if: matrix.os == 'macos-latest'
         run: |
-          curl -L -o vulkansdk-macos.zip https://sdk.lunarg.com/sdk/download/1.4.313.1/mac/vulkansdk-macos-1.4.313.1.zip
-          unzip vulkansdk-macos.zip
-          INSTALLER_APP="vulkansdk-macOS-1.4.313.1.app"
           INSTALL_DIR="$PWD/vulkansdk"
-          mkdir -p "$INSTALL_DIR"
-          echo "--- Running Vulkan SDK Installer ---"
-          sudo ./${INSTALLER_APP}/Contents/MacOS/vulkansdk-macOS-1.4.313.1 --root "$INSTALL_DIR" --accept-licenses --default-answer --confirm-command install
+          if [ -d "$INSTALL_DIR/macOS" ]; then
+            echo "Using cached Vulkan SDK"
+          else
+            echo "Downloading and installing Vulkan SDK"
+            curl -L -o vulkansdk-macos.zip https://sdk.lunarg.com/sdk/download/1.4.313.1/mac/vulkansdk-macos-1.4.313.1.zip
+            unzip vulkansdk-macos.zip
+            INSTALLER_APP="vulkansdk-macOS-1.4.313.1.app"
+            mkdir -p "$INSTALL_DIR"
+            echo "--- Running Vulkan SDK Installer ---"
+            sudo ./${INSTALLER_APP}/Contents/MacOS/vulkansdk-macOS-1.4.313.1 --root "$INSTALL_DIR" --accept-licenses --default-answer --confirm-command install
+          fi
           echo "--- Contents of installation directory ---"
           ls -R "$INSTALL_DIR"
           # The actual SDK is now in $INSTALL_DIR/macOS
