@@ -1,0 +1,170 @@
+name: Windows & Linux Build
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build_artifacts:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: ${{ github.ref == 'refs/heads/main' && fromJson('["release"]') || fromJson('["debug"]') }}
+
+    steps:
+      - name: Print Working Directory
+        run: pwd
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Add MSBuild to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.x'
+
+      - name: Setup Vulkan Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.313.2/windows/vulkansdk-windows-X64-1.4.313.2.exe" -OutFile VulkanSDK.exe
+          $INSTALL_DIR = "$PWD/vulkansdk"
+          $installer_args = "--root", "$INSTALL_DIR", "--accept-licenses", "--default-answer", "--confirm-command", "install"
+          Start-Process -FilePath .\VulkanSDK.exe -ArgumentList $installer_args -Wait -NoNewWindow
+
+          echo "--- Contents of installation directory ---"
+          ls -R "$INSTALL_DIR"
+
+          if (Test-Path "$INSTALL_DIR") {
+            echo "Found Vulkan SDK directory."
+            echo "VULKAN_SDK=$INSTALL_DIR" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            echo "$INSTALL_DIR\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            echo "Error: Vulkan SDK directory not found after install."
+            exit 1
+          }
+
+      - name: Install SDL3 Build Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git make pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev libvulkan-dev vulkan-tools
+
+      - name: Make scripts executable (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          chmod +x install.sh
+          chmod +x build.sh
+      - name: Configure Project
+        run: |
+          ./install.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
+      - name: Build Project
+        run: |
+          ./build.${{ (matrix.os == 'windows-latest' && 'bat') || 'sh' }} -${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+        shell: bash
+      - name: List Build Output (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          dir build\${{ matrix.build_type }}
+      - name: List Build Output (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          ls -R build/${{ matrix.build_type }}
+      - name: Prepare Artifact
+        run: |
+          mkdir artifact_staging
+          cp build/${{ matrix.build_type }}/${{ (matrix.os == 'windows-latest' && 'Vega42.exe') || 'Vega42' }} artifact_staging/
+      - name: Copy SDL3 DLL (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/SDL3.dll artifact_staging/
+      - name: Copy SDL3 Shared Library (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cp bin/${{ matrix.build_type }}/libSDL3.so artifact_staging/ || cp bin/${{ matrix.build_type }}/libSDL3.dylib artifact_staging/
+      - name: Copy PDB for Windows Debug builds
+        if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
+        run: |
+          Copy-Item build/${{ matrix.build_type }}/Vega42.pdb artifact_staging/
+      - name: Create Archive (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          tar -czvf Vega42-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz -C artifact_staging .
+      - name: Create Zip Archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          7z a Vega42-windows-${{ matrix.build_type }}.zip artifact_staging\
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vega42-${{ matrix.os }}-${{ matrix.build_type }}
+          path: |
+            ${{ (matrix.os == 'windows-latest' && format('Vega42-windows-{0}.zip', matrix.build_type)) || format('Vega42-{0}-{1}.tar.gz', matrix.os, matrix.build_type) }}
+
+  build_android_artifacts:
+    uses: ./.github/workflows/android_build.yml
+
+  create_github_release:
+    needs: [build_artifacts, build_android_artifacts]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: List Downloaded Artifacts
+        run: ls -R artifacts/
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/Vega42-windows-latest-release/Vega42-windows-release.zip
+          asset_name: Vega42-windows-release.zip
+          asset_content_type: application/zip
+
+      - name: Upload Ubuntu Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/Vega42-ubuntu-latest-release/Vega42-ubuntu-latest-release.tar.gz
+          asset_name: Vega42-ubuntu-latest-release.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Android Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/Vega42-android-release/Vega42-android-release.apk
+          asset_name: Vega42-android-release.apk
+          asset_content_type: application/vnd.android.package-archive

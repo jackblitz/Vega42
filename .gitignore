@@ -1,0 +1,8 @@
+/.idea
+/bin
+/vs_build
+/build
+/app/platform/android/app/build
+/app/platform/android/app/.cxx
+/app/platform/android/.gradle
+/app/platform/android/.idea
