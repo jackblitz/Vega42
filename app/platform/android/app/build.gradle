@@ -18,10 +18,23 @@ android {
             }
         }
     }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_FILE") ?: "release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "claude"
+            keyAlias System.getenv("KEY_ALIAS") ?: "vega42release"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "claude"
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
     /*sourceSets.main {

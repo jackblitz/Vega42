@@ -43,6 +43,20 @@ jobs:
         # will be used to build libavif and the JNI bindings.
         run: sdkmanager "cmake;3.30.3"
 
+      - name: Generate Release Keystore
+        run: |
+          # Generate a keystore for signing the APK
+          keytool -genkey -v -keystore release.keystore -alias vega42release -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" -keypass "${{ secrets.KEY_PASSWORD }}" \
+            -dname "CN=JB, OU=Vega42, O=Polaris, L=Unknown, S=Unknown, C=US"
+          
+          # Set environment variables for gradle
+          echo "KEYSTORE_FILE=$(pwd)/release.keystore" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=vega42release" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+        working-directory: app/platform/android
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: app/platform/android
