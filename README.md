@@ -1,98 +1,60 @@
-# Project Setup
+# Vega42 Game Engine
 
-This project uses CMake for building. To configure the project, use the provided scripts.
+A C++ game engine built with Polaris core architecture, featuring SDL3 integration and cross-platform support.
 
-## CLion Users
+## Quick Start
 
-If you are using CLion, you can open the `workspace` directory as the project root. CLion will automatically detect the `CMakeLists.txt` file and configure the project for you.
+### Download Pre-built Releases
 
-## Command Line Users
+The easiest way to get started is to download the latest pre-built release:
 
-For command-line users, scripts are provided to configure the project for different build types.
+1. Go to the [Releases](https://github.com/your-username/Vega42/releases) page
+2. Download the latest release for your platform:
+   - **Windows**: `Vega42-windows-release.zip`
+   - **Linux**: `Vega42-ubuntu-latest-release.tar.gz`
+   - **Android**: `Vega42-android-release.apk`
 
-### Windows
+### Running the Application
 
-Use the `install.bat` script with one of the following options:
+#### Windows
+1. Extract the zip file
+2. Run `Vega42.exe`
 
+#### Linux
+1. Extract the tar.gz file: `tar -xzvf Vega42-ubuntu-latest-release.tar.gz`
+2. Make the executable runnable: `chmod +x Vega42`
+3. Run the executable: `./Vega42`
+
+#### Android
+1. Install the APK on your Android device
+2. Launch the Vega42 app
+
+## Development Setup
+
+### CLion Users
+
+Open the `workspace` directory as the project root. CLion will automatically detect the `CMakeLists.txt` file and configure the project.
+
+### Command Line Build
+
+#### Windows
 ```batch
-install.bat -debug
-install.bat -release
+install.bat -debug    # or -release
+build.bat -debug      # or -release
 ```
 
-### macOS and Linux
-
-Use the `install.sh` script. You may need to make it executable first:
-
+#### Linux
 ```bash
-chmod +x install.sh
+chmod +x install.sh build.sh
+./install.sh -debug   # or -release
+./build.sh -debug     # or -release
 ```
 
-Then, run it with one of the following options:
+## Development Builds
 
-```bash
-./install.sh -debug
-./install.sh -release
-```
+For development builds from GitHub Actions:
 
-## Building the Project
-
-After configuring the project, you can build it using the following scripts:
-
-### Windows
-
-```batch
-build.bat -debug
-build.bat -release
-```
-
-### macOS and Linux
-
-```bash
-./build.sh -debug
-./build.sh -release
-```
-
-## Running and Testing Builds
-
-After a successful build on GitHub Actions, you can download the generated artifacts and run them.
-
-### 1. Download Build Artifacts
-
-*   Go to your GitHub repository in your web browser.
-*   Click on the "Actions" tab.
-*   Find the workflow run that corresponds to your latest push (e.g., to `dev` for debug builds, or `main` for release builds).
-*   Click on the specific workflow run.
-*   On the summary page for that run, scroll down to the "Artifacts" section.
-*   Download the desired artifact (e.g., `Vega42-linux-debug-build`, `Vega42-macos-debug-build`, `Vega42-linux.tar.gz`, `Vega42-macos.tar.gz`).
-
-### 2. Run and Test the Builds
-
-#### For Linux Builds
-
-*   **If it's a debug build artifact (e.g., `Vega42-linux-debug-build`):**
-    *   Unzip the downloaded artifact.
-    *   Open a terminal.
-    *   Navigate to the directory where you unzipped the files (e.g., `cd path/to/Vega42-linux-debug-build/build/Debug`).
-    *   Make the executable runnable: `chmod +x Vega42`
-    *   Run the executable: `./Vega42`
-*   **If it's a release build artifact (e.g., `Vega42-linux.tar.gz`):**
-    *   Extract the tar.gz file: `tar -xzvf Vega42-linux.tar.gz`
-    *   Navigate into the extracted directory (e.g., `cd release_assets`).
-    *   Make the executable runnable: `chmod +x Vega42`
-    *   Run the executable: `./Vega42`
-
-#### For macOS Builds
-
-*   **If it's a debug build artifact (e.g., `Vega42-macos-debug-build`):**
-    *   Unzip the downloaded artifact.
-    *   Open a terminal.
-    *   Navigate to the executable (e.g., `cd path/to/Vega42-macos-debug-build/build/Debug`).
-    *   Make the executable runnable: `chmod +x Vega42`
-    *   Run the executable: `./Vega42`
-*   **If it's a release build artifact (e.g., `Vega42-macos.tar.gz`):**
-    *   Extract the tar.gz file: `tar -xzvf Vega42-macos.tar.gz`
-    *   Navigate into the extracted directory (e.g., `cd release_assets`).
-    *   Make the executable runnable: `chmod +x Vega42`
-    *   Run the executable: `./Vega42`
-
-Remember to replace `path/to/` with the actual path where you downloaded and extracted the files.
+1. Go to the [Actions](https://github.com/your-username/Vega42/actions) tab
+2. Find the latest successful workflow run
+3. Download the artifact for your platform
+4. Extract and run as described above
