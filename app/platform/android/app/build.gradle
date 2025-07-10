@@ -21,9 +21,9 @@ android {
     signingConfigs {
         release {
             storeFile file(System.getenv("KEYSTORE_FILE") ?: "release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "claude"
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "password123"
             keyAlias System.getenv("KEY_ALIAS") ?: "vega42release"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "claude"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "password123"
         }
     }
     
