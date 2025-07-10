@@ -89,7 +89,15 @@ jobs:
       - name: Copy SDL3 Shared Library (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: |
-          cp bin/${{ matrix.build_type }}/libSDL3.so artifact_staging/ || cp bin/${{ matrix.build_type }}/libSDL3.dylib artifact_staging/
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            cp bin/${{ matrix.build_type }}/libSDL3.so* artifact_staging/ 2>/dev/null || true
+            # Create symlink if libSDL3.so.0 doesn't exist
+            if [ ! -f artifact_staging/libSDL3.so.0 ] && [ -f artifact_staging/libSDL3.so ]; then
+              ln -sf libSDL3.so artifact_staging/libSDL3.so.0
+            fi
+          else
+            cp bin/${{ matrix.build_type }}/libSDL3.dylib artifact_staging/
+          fi
       - name: Copy PDB for Windows Debug builds
         if: matrix.os == 'windows-latest' && matrix.build_type == 'Debug'
         run: |
