@@ -77,7 +77,15 @@ jobs:
       - name: Create keystore from secret
         run: |
           # Decode the keystore file from GitHub secrets
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release.keystore
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > original.keystore
+          
+          # Convert to JKS format if needed (handles both PKCS12 and JKS)
+          keytool -importkeystore -srckeystore original.keystore -srcstoretype PKCS12 \
+            -destkeystore release.keystore -deststoretype JKS \
+            -srcstorepass "${{ secrets.KEYSTORE_PASSWORD }}" -deststorepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -srcalias key0 -destalias key0 \
+            -srckeypass "${{ secrets.KEY_PASSWORD }}" -destkeypass "${{ secrets.KEY_PASSWORD }}" \
+            -noprompt || cp original.keystore release.keystore
           
           # Set environment variables for gradle
           echo "KEYSTORE_FILE=$(pwd)/release.keystore" >> $GITHUB_ENV
